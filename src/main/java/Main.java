@@ -6,27 +6,15 @@ public class Main {
         final var server = new Server();
         server.addHandler("GET", "/index.html", (request, outputStreamStream) -> {
             try {
-                Server.positiveresponse(request, outputStreamStream);
+                Server.positiveResponse(request, outputStreamStream);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
-//
-//
-//
-//        for (int i = 0; i < ValidPaths.validPaths.size(); i++) {
-//            server.addHandler("GET", ValidPaths.validPaths.get(i), (request, outputStreamStream) -> {
-//                try {
-//                    Server.positiveresponse(request, outputStreamStream);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            });
-//        }
 
-        server.addHandler("POST", "/links.html", (request, outputStreamStream) -> {
+        server.addHandler("POST", "/resources.html", (request, outputStreamStream) -> {
             try {
-                Server.positiveresponse(request, outputStreamStream);
+                Server.positiveResponse(request, outputStreamStream);
             } catch (IOException e) {
                 e.printStackTrace();
             }

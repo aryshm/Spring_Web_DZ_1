@@ -30,15 +30,19 @@ public class Server {
         } try {
             while (true) {
                 socket = server.accept();
+                SERVICE.submit(processing(socket));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        SERVICE.submit(processing(socket));
     }
 
     public void addHandler(String method, String path, Handler handler) {
-        handlers.put(method, new HashMap<String, Handler>(Map.of(path, handler)));
+        if (handlers.containsValue(method)) {
+            handlers.get(method).put(path, handler);
+        } else {
+            handlers.put(method, new ConcurrentHashMap<>(Map.of(path, handler)));
+        }
     }
 
     public static Runnable processing(Socket socket) {
@@ -70,23 +74,19 @@ public class Server {
                 Handler handler = Server.getHandlers().get(request.getMethod()).get(request.getPath());
 
                 if (handler == null) {
-                    Path parent = Path.of(request.getPath()).getParent();
-                    handler = Server.getHandlers().get(request.getMethod()).get(parent.toString());
-                    if (handler == null) {
-                        notFound(out);
-                        return;
-                    }
+                    notFound(out);
+                    return;
                 }
 
                 handler.handle(request, out);
-                positiveresponse(request, out);
+                positiveResponse(request, out);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         };
     }
 
-    public static void positiveresponse(Request request, BufferedOutputStream out) throws IOException {
+    public static void positiveResponse(Request request, BufferedOutputStream out) throws IOException {
         final var filePath = Path.of(".", "public", request.getPath());
         final var mimeType = Files.probeContentType(filePath);
         if (request.getPath().equals("/classic.html")) {
