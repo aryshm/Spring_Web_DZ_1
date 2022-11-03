@@ -70,7 +70,8 @@ public class Server {
 
                 Request request = new Request(parts[0], parts[1], headers, socket.getInputStream());
 
-                Handler handler = Server.getHandlers().get(request.getMethod()).get(request.getPath());
+                Handler handler = Server.getHandlers().get(request.getMethod())
+                        .get(request.getQueryParam(request.getPath()));
 
                 if (handler == null) {
                     notFound(out);
@@ -86,7 +87,7 @@ public class Server {
     }
 
     public static void positiveResponse(Request request, BufferedOutputStream out) throws IOException {
-        final var filePath = Path.of(".", "public", request.getPath());
+        final var filePath = Path.of(".", "public", request.getQueryParam(request.getPath()));
         final var mimeType = Files.probeContentType(filePath);
         if (request.getPath().equals("/classic.html")) {
             final var template = Files.readString(filePath);
