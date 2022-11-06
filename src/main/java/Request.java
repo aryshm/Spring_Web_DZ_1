@@ -1,10 +1,14 @@
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.apache.commons.collections4.MultiMap;
+import org.apache.commons.collections4.map.MultiValueMap;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 public class Request {
 
@@ -12,22 +16,25 @@ public class Request {
     private final String path;
     private final Map<String, String> headers;
     private final InputStream body;
-    private final List<NameValuePair> params;
-    private final Map <String, String> parameter;
+    private final MultiMap parameter;
+    private List<NameValuePair> params;
 
     public Request(String method, String path, Map<String, String> headers, InputStream body) {
         this.method = method;
         this.path = path;
         this.headers = headers;
         this.body = body;
-        this.params = URLEncodedUtils.parse(path, StandardCharsets.UTF_8);
-        this.parameter = new HashMap<>();
-        for (NameValuePair param : params) {
-            if (param.getName() != null && param.getValue() != null) {
-                parameter.put(param.getName(), param.getValue());
+        this.parameter = new MultiValueMap<>();
+        try {
+            params = URLEncodedUtils.parse(new URI(path), StandardCharsets.UTF_8);
+            for (NameValuePair param : params) {
+                if (param.getName() != null && param.getValue() != null) {
+                    parameter.put(param.getName(), param.getValue());
+                }
             }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
-
     }
 
     public String getQueryParam(String name) {
@@ -40,8 +47,8 @@ public class Request {
         return result;
     }
 
-    public List<NameValuePair> getQueryParams() {
-        return params;
+    public MultiMap getQueryParams() {
+        return parameter;
     }
 
     public String getPath() {
